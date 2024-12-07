@@ -1,0 +1,16 @@
+review_edit_blog:
+  description: >
+    Review the feedback and adjust the blog content accordingly satisfying
+    all of the points mentioned in the feedback.
+    Utilize tools to extract the author's notes, check word count and
+    ensure your edits adheres to the feedback provided.
+
+    The blog must be written in markdown format.
+
+    Please incorporate the following feedback if present: 
+    {feedback}
+    
+  expected_output: >
+    A markdown-formatted blog that:
+    - meets all the feedback notes and requirements
+  agent: editor

@@ -5,21 +5,22 @@ from note_to_blog_flow.types import BlogOutline
 from note_to_blog_flow.crews.outline_crew.outline_crew import OutlineCrew
 from note_to_blog_flow.crews.writing_crew.writing_crew import WriteBlogSectionCrew
 from note_to_blog_flow.crews.review_crew.review_crew import ReviewBlogCrew
-from note_to_blog_flow.config import FLOW_INPUT_VARIABLES, LANGTRACE_API_KEY
+from note_to_blog_flow.crews.editing_crew.editing_crew import EditingCrew
+from note_to_blog_flow.crews.scrape_crew.scrape_crew import ScrapeCrew
+from note_to_blog_flow.config import LANGTRACE_API_KEY
 from langtrace_python_sdk import langtrace
 import os
-from datetime import datetime
 import json
 
 langtrace.init(api_key=LANGTRACE_API_KEY)
 
 
 class BlogState(BaseModel):
-    title: str = FLOW_INPUT_VARIABLES["title"]
-    topic: str = FLOW_INPUT_VARIABLES["topic"]
-    goal: str = FLOW_INPUT_VARIABLES["goal"]
-    word_count: str = FLOW_INPUT_VARIABLES["word_count"]
-    writing_style: str = FLOW_INPUT_VARIABLES["writing_style"]
+    title: str = ""
+    topic: str = ""
+    goal: str = ""
+    word_count: str = ""
+    writing_style: str = ""
     blog: str = ""
     blog_outline: List[BlogOutline] = []
     feedback: Optional[str] = None
@@ -35,11 +36,29 @@ class BlogFlow(Flow[BlogState]):
         os.makedirs("output")
 
     @start()
+    def scrape_crew(self):
+        print("Kickoff the Scrape Crew")
+        output = ScrapeCrew().crew().kickoff()
+
+        print("Front Matter:", output)
+        print("Output type:", type(output))
+
+        try:
+            self.state.title = output["title"]
+            self.state.topic = output["topic"]
+            self.state.goal = output["goal"]
+            self.state.word_count = output["word_count"]
+            self.state.writing_style = output["writing_style"]
+        except AttributeError:
+            raise ValueError(
+                "CrewOutput does not return the expected attributes. Verify its structure."
+            )
+
+        return output
+
+    @listen(scrape_crew)
     def outline_crew(self):
         print("Kickoff the Outline Crew")
-
-        current_time = datetime.now().strftime("%Y-%m-%dT%H:%M:%SZ")
-        self.state.date_time = current_time
 
         output = (
             OutlineCrew()
@@ -73,35 +92,59 @@ class BlogFlow(Flow[BlogState]):
 
     @listen(or_(outline_crew, "retry"))
     def generate_blog_content(self):
-        print("Kickoff the Writing Crew")
+        if self.state.retry_count == 0:
+            print("Kickoff the Writing Crew")
 
-        output = (
-            WriteBlogSectionCrew()
-            .crew()
-            .kickoff(
-                inputs={
-                    "blog_outline": self.state.blog_outline,
-                    "goal": self.state.goal,
-                    "topic": self.state.topic,
-                    "word_count": self.state.word_count,
-                    "writing_style": self.state.writing_style,
-                    "title": self.state.title,
-                    "feedback": self.state.feedback,
-                    "date_time": self.state.date_time,
-                }
+            output = (
+                WriteBlogSectionCrew()
+                .crew()
+                .kickoff(
+                    inputs={
+                        "blog_outline": self.state.blog_outline,
+                        "goal": self.state.goal,
+                        "topic": self.state.topic,
+                        "word_count": self.state.word_count,
+                        "writing_style": self.state.writing_style,
+                        "title": self.state.title,
+                        "feedback": self.state.feedback,
+                    }
+                )
             )
-        )
-        blog_content = output["content"]
-        print("Blog:", blog_content)
-        self.state.blog = blog_content
+            blog_content = output["content"]
+            print("Blog:", blog_content)
+            self.state.blog = blog_content
 
-        return blog_content
+            return blog_content
+
+        if not self.state.valid and self.state.retry_count > 0:
+            print("Kickoff the Revised Writing Crew")
+
+            output = (
+                EditingCrew()
+                .crew()
+                .kickoff(
+                    inputs={
+                        "blog": self.state.blog,
+                        "feedback": self.state.feedback,
+                    }
+                )
+            )
+            blog_content = output["content"]
+            print("Blog:", blog_content)
+            self.state.blog = blog_content
+
+            return blog_content
 
     @router(generate_blog_content)
     def evaluate_blog(self):
-        print("Verify the Blog")
+        print("Kickoff Verify the Blog Crew")
+        print("Retry count:", self.state.retry_count)
+
         if self.state.retry_count > 3:
+            print("Max retry exceeded")
             return "max_retry_exceeded"
+        else:
+            print("Retrying, current count:", self.state.retry_count)
 
         result = (
             ReviewBlogCrew()
@@ -127,9 +170,11 @@ class BlogFlow(Flow[BlogState]):
         self.state.retry_count += 1
 
         if self.state.valid:
+            print("Validation successful, transitioning to complete")
             return "complete"
 
-        return "retry"
+        print("Validation failed, transitioning to retry")
+        return "retry"  # Emit retry state explicitly
 
     @listen("complete")
     def save_blog(self):
@@ -137,7 +182,7 @@ class BlogFlow(Flow[BlogState]):
         print("Blog is valud")
         print("Blog:", self.state.blog)
 
-        file_name = f"./output/{self.state.title.replace(' ', '_')}.md"
+        file_name = f"./output/{self.state.title.replace(' ', '_')}_complete.md"
         with open(file_name, "w", encoding="utf-8") as file:
             file.write(self.state.blog)
 
@@ -146,6 +191,12 @@ class BlogFlow(Flow[BlogState]):
         print("Max retry count exceeded")
         print("Blog:", self.state.blog)
         print("Feedback:", self.state.feedback)
+
+        file_name = (
+            f"./output/{self.state.title.replace(' ', '_')}_max_retry_exceeded.md"
+        )
+        with open(file_name, "w", encoding="utf-8") as file:
+            file.write(self.state.blog)
 
 
 def kickoff():

@@ -1,0 +1,16 @@
+scrape_front_matter:
+  description: >
+    Read through the author's notes and extract the following details from its front matter:
+    - Title
+    - Topic
+    - Goal
+    - Writing style
+    - Word count
+  expected_output: >
+    title: title value
+    topic: topic value
+    goal: goal value
+    writing_style: writing_style value
+    word_count: word_count value
+  agent: scraper
+

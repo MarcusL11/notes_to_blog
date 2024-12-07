@@ -5,7 +5,7 @@ verify_blog:
     to read the author's notes. Additionally, if you believe there 
     are any issues with the blog or ways it could be improved, 
     such as the structure of the blog, rhythm, writing stlye, 
-    tone, word choice, please provide feedback.
+    tone, word choice, and content, please provide feedback.
 
     If any of the criterias are not met, the post is considered invalid.
     Provide actionable changes about what is wrong and what actions
@@ -14,12 +14,12 @@ verify_blog:
     Your final response must include:
     - Valid: True/False
     - Feedback: Provide commentary if the post fails any of the criteria.
-    
 
     The review must check the following guidelines:
     - All headers are H3 type "###".
     - All sub-headers are H4 type "####".
     - All code block examples are properly formatted with the code language specified.
+    - All links and sources shared in the author's notes are covered in the blog
 
     Here is the blog_outline:\n\n {blog_outline}
     Here is the topic for the blog: {topic}

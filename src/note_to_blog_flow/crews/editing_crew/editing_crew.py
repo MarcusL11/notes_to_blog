@@ -1,18 +1,20 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
-from crewai_tools import FileReadTool, MDXSearchTool
 from crewai import LLM
-from note_to_blog_flow.config import LLM_CONFIGS, FILE_PATH
-from note_to_blog_flow.types import BlogOutline
+from note_to_blog_flow.config import LLM_CONFIGS
+from crewai_tools import FileReadTool, MDXSearchTool
+from note_to_blog_flow.tools.CharacterCounterTool import CharacterCounterTool
+from note_to_blog_flow.types import Section
 
 
 read_notes = FileReadTool(file_path="./notes.md")
 semantic_search_notes = MDXSearchTool(mdx="./notes.mdx")
+character_counter = CharacterCounterTool()
 
 
 @CrewBase
-class OutlineCrew:
-    """Blog Outline Crew"""
+class EditingCrew:
+    """Review and Edit Blog Crew"""
 
     agents_config = "config/agents.yaml"
     tasks_config = "config/tasks.yaml"
@@ -26,24 +28,24 @@ class OutlineCrew:
     )
 
     @agent
-    def outliner(self) -> Agent:
+    def editor(self) -> Agent:
         return Agent(
-            config=self.agents_config["outliner"],  # pyright: ignore
+            config=self.agents_config["editor"],  # pyright: ignore
             llm=self.openai_llm,
-            tools=[read_notes, semantic_search_notes],
+            tools=[read_notes, semantic_search_notes, character_counter],
             verbose=True,
         )
 
     @task
-    def generate_outline(self) -> Task:
+    def review_edit_blog(self) -> Task:
         return Task(
-            config=self.tasks_config["generate_outline"],  # pyright: ignore
-            output_pydantic=BlogOutline,
+            config=self.tasks_config["review_edit_blog"],  # pyright: ignore
+            output_pydantic=Section,
         )
 
     @crew
     def crew(self) -> Crew:
-        """Creates the Blog Outline Crew"""
+        """Creates the Editing Crew"""
         return Crew(
             agents=self.agents,  # pyright: ignore
             tasks=self.tasks,  # pyright: ignore

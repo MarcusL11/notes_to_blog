@@ -3,7 +3,7 @@ from crewai.project import CrewBase, agent, crew, task
 from crewai_tools import FileReadTool, MDXSearchTool
 from crewai import LLM
 from note_to_blog_flow.config import LLM_CONFIGS, FILE_PATH
-from note_to_blog_flow.types import BlogOutline
+from note_to_blog_flow.types import BlogFrontMatter
 
 
 read_notes = FileReadTool(file_path="./notes.md")
@@ -11,7 +11,7 @@ semantic_search_notes = MDXSearchTool(mdx="./notes.mdx")
 
 
 @CrewBase
-class OutlineCrew:
+class ScrapeCrew:
     """Blog Outline Crew"""
 
     agents_config = "config/agents.yaml"
@@ -26,19 +26,19 @@ class OutlineCrew:
     )
 
     @agent
-    def outliner(self) -> Agent:
+    def scraper(self) -> Agent:
         return Agent(
-            config=self.agents_config["outliner"],  # pyright: ignore
+            config=self.agents_config["scraper"],  # pyright: ignore
             llm=self.openai_llm,
             tools=[read_notes, semantic_search_notes],
             verbose=True,
         )
 
     @task
-    def generate_outline(self) -> Task:
+    def scrape_front_matter(self) -> Task:
         return Task(
-            config=self.tasks_config["generate_outline"],  # pyright: ignore
-            output_pydantic=BlogOutline,
+            config=self.tasks_config["scrape_front_matter"],  # pyright: ignore
+            output_pydantic=BlogFrontMatter,
         )
 
     @crew

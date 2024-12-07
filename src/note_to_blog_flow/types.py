@@ -17,6 +17,14 @@ class BlogOutline(BaseModel):
     sections: List[Header]
 
 
+class BlogFrontMatter(BaseModel):
+    title: str
+    topic: str
+    goal: str
+    writing_style: str
+    word_count: str
+
+
 class Section(BaseModel):
     title: str
     content: str
