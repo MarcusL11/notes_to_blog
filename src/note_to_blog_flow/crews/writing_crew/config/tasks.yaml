@@ -1,0 +1,35 @@
+write_blog:
+  description: >
+    Utilize tools to extract the author's notes, check word count and
+    write a well-structured blog based on the title, blog outline, goal, 
+    and the author's notes. You must ensure that any links or sources
+    in the author's notes are use in the blog.
+
+    The blog must be written in markdown format, 
+    with a {writing_style} style and should contain around {word_count} 
+    words. 
+
+    Please incorporate the following feedback if present: 
+    {feedback}
+    
+    Here is the blog_outline:\n\n {blog_outline}
+    Here is the topic for the blog: {topic}
+    Here is the author's goal for the blog: {goal}
+    Here is the title of the blog: {title}
+    
+    The blog must have the following formating rules: \n
+    - All headers must be H3 type "###"
+    - All sub-headers must be H4 type "####"
+    - All code block examples must with the code language, Python for example:\n
+    ```python 
+    def function():
+      # code goes here
+    ```
+  expected_output: >
+    A markdown-formatted blog that:
+    - Covers the blog outline, author's goal, and the author's notes comprehensively.
+    - Adheres to the specified {writing_style} and contains around {word_count} words.
+    - Uses H3 type "###" for all headers.
+    - Uses H4 type "####" for all sub-headers.
+    - Properly formats all code block examples with the specified code language.
+  agent: writer

@@ -1,0 +1,16 @@
+generate_outline:
+  description: >
+    Utilize tools to extract the author's notes and
+    create a blog outline with sections in sequential order 
+    based on the author's notes. Ensure that each section 
+    has a header, subheader (if necessary), a brief 
+    description of the headers, subheaders, and the relevant context
+    from the author's notes that highlights the topic to be 
+    covered. It's important to note that the blog is only going to be 
+    {word_count} words or less. Also, make sure that you do not duplicate 
+    any sections or topics in the outline. 
+    Here are the author's desired goals for the blog: {goal}
+  expected_output: >
+    An outline of sections, with headers, subheaders for each header, and
+    descriptions of what each header will contain.
+  agent: outliner
