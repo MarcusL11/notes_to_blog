@@ -6,8 +6,8 @@ from note_to_blog_flow.config import LLM_CONFIGS, FILE_PATH
 from note_to_blog_flow.types import BlogOutline
 
 
-read_notes = FileReadTool(file_path="./notes.md")
-semantic_search_notes = MDXSearchTool(mdx="./notes.mdx")
+read_notes = FileReadTool(file_path=FILE_PATH)
+semantic_search_notes = MDXSearchTool(mdx=FILE_PATH)
 
 
 @CrewBase

@@ -54,3 +54,16 @@ For support, questions, or feedback regarding the {{crew_name}} Crew or crewAI.
 - [Chat with our docs](https://chatg.pt/DWjSBZn)
 
 Let's create wonders together with the power and simplicity of crewAI.
+
+## Note's Front Matter 
+
+```markdown
+---
+title: < Define title here >
+topic: < Define the topic of the notes > 
+goal: < Define the purpose of the blog >
+writing_style: < Define the writing style, keep it short for best results >
+word_count: < Define the word count of the blog >
+---
+```
+

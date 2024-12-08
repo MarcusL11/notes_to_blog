@@ -1,14 +1,14 @@
 from crewai import Agent, Crew, Process, Task
 from crewai.project import CrewBase, agent, crew, task
 from crewai import LLM
-from note_to_blog_flow.config import LLM_CONFIGS
+from note_to_blog_flow.config import LLM_CONFIGS, FILE_PATH
 from note_to_blog_flow.types import VerifyBlog
 from crewai_tools import FileReadTool, MDXSearchTool
 from note_to_blog_flow.tools.CharacterCounterTool import CharacterCounterTool
 
 
-read_notes = FileReadTool(file_path="./notes.md")
-semantic_search_notes = MDXSearchTool(mdx="./notes.mdx")
+read_notes = FileReadTool(file_path=FILE_PATH)
+semantic_search_notes = MDXSearchTool(mdx=FILE_PATH)
 character_counter = CharacterCounterTool()
 
 
